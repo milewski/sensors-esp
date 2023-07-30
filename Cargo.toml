@@ -12,7 +12,7 @@ embuild = "0.31.2"
 
 [workspace]
 resolver = "2"
-members = ["sensors/*"]
+members = ["esp32/*"]
 
 [profile.release]
 opt-level = "s"
