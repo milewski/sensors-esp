@@ -3,6 +3,7 @@
 My personal journey into embedded development with Lilygo T-Display S3 Microcontroller
 
 - [Rotary Encoder](./esp32/rotary-encoder)
+- [Line Tracking Sensor](./esp32/line-tracking-sensor)
 
 ## Instructions
 
