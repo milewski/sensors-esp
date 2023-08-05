@@ -7,5 +7,5 @@ This example alternates the pin `PB12` and `PC43` (Built In Led) high/low to bli
 Run the project via:
 
 ```bash
-cargo run -p blinky -- --monitor
+cargo run -p blinky
 ```

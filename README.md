@@ -4,6 +4,19 @@ My personal journey into embedded development with Lilygo T-Display S3 Microcont
 
 - [Rotary Encoder](./esp32/rotary-encoder)
 
+## Instructions
+
+Install `esp32` [toolchain](https://github.com/esp-rs/rust-build):
+
+```bash
+cargo install espup
+cargo install ldproxy
+cargo install espflash
+espup install
+```
+
+> Note: `espup` requires `python3` to be installed
+
 <details>
   <summary>Pinout Diagram</summary>
 
