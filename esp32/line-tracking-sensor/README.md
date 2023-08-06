@@ -7,8 +7,8 @@ It does this by emitting IR light and detecting the amount of light that is refl
 
 ## Features
 
-- Black or no Obstacle = Logic HIGH
-- White or obstacle = Logic LOW
+- Black or no obstacle = Outputs HIGH
+- White or obstacle = Outputs LOW
 - Detection distance: 1.5cm (tested with white paper)
 
 ### How to Run
