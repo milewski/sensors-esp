@@ -1,10 +1,10 @@
 # Passive Buzzer
 
-https://github.com/milewski/sensors-esp/assets/2874967/ad7b49f8-3256-4350-b537-90daa4b9aa3c
+https://github.com/milewski/sensors-esp/assets/2874967/4fd229d9-babe-495e-8abf-6bdeab3a12ad
 
-This example uses a RMT transmitter to generate pulses at a specific frequency to play a song on a passive buzzer.
+This example uses an RMT transmitter to generate pulses at a specific frequency to play a song on a passive buzzer.
 
-Part of the code/songs was translated from C to Rust from this [repository](https://github.com/robsoncouto/arduino-songs).
+> Part of the code/songs was translated from C to Rust from this [repository](https://github.com/robsoncouto/arduino-songs).
 
 ## Features
 
@@ -22,5 +22,5 @@ cargo run -p passive-buzzer
 
 ### Notes
 
-- Active buzzer is louder than passive buzzer.
-- 
+- Active buzzer is louder than passive one.
+- These buzzers have 3 pins, but I have not figured out what is the middle pin used for.
