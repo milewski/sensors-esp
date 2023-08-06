@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use esp_idf_hal::delay::FreeRtos;
 use esp_idf_hal::gpio::{Level, PinDriver};
 use esp_idf_hal::peripherals::Peripherals;
@@ -9,7 +7,7 @@ fn main() -> anyhow::Result<()> {
 
     let peripherals = Peripherals::take().unwrap();
 
-    let mut sensor = PinDriver::input(peripherals.pins.gpio2)?;
+    let sensor = PinDriver::input(peripherals.pins.gpio2)?;
     let mut red_led = PinDriver::output(peripherals.pins.gpio3)?;
     let mut green_led = PinDriver::output(peripherals.pins.gpio10)?;
     let mut active_buzzer = PinDriver::output(peripherals.pins.gpio11)?;
