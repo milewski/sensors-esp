@@ -1,0 +1,13 @@
+[package]
+name = "micro-sdcard"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+esp-idf-sys.workspace = true
+esp-idf-hal.workspace = true
+anyhow.workspace = true
+embedded-sdmmc = { version = "0.5.0" }
+
+[build-dependencies]
+embuild.workspace = true

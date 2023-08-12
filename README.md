@@ -5,6 +5,7 @@ My personal journey into embedded development with Lilygo T-Display S3 Microcont
 - [Rotary Encoder](./esp32/rotary-encoder)
 - [Line Tracking Sensor](./esp32/line-tracking-sensor)
 - [Passive Buzzer](./esp32/passive-buzzer)
+- [Micro SD Card Adapter](./esp32/micro-sdcard)
 
 ## Instructions
 
