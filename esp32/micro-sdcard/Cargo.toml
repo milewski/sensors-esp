@@ -7,7 +7,13 @@ edition.workspace = true
 esp-idf-sys.workspace = true
 esp-idf-hal.workspace = true
 anyhow.workspace = true
+button-driver = { version = "0.1.1", features = ["std", "embedded_hal"] }
 embedded-sdmmc = { version = "0.5.0" }
+ssd1306 = "0.8.0"
+embedded-graphics = "0.8.1"
+profont = "0.7.0"
+numfmt = "1.1.1"
+rotary-encoder-embedded = "0.2.0"
 
 [build-dependencies]
 embuild.workspace = true

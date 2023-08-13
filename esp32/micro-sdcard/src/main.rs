@@ -1,26 +1,28 @@
 use std::fmt::{Display, Formatter};
+use std::sync::Mutex;
 
-use embedded_sdmmc::{BlockDevice, File, Mode, SdCard, TimeSource, Timestamp, Volume, VolumeIdx, VolumeManager};
+use anyhow::anyhow;
+use embedded_graphics::Drawable;
+use embedded_graphics::prelude::*;
+use embedded_sdmmc::{BlockDevice, TimeSource};
 use esp_idf_hal::delay::FreeRtos;
-use esp_idf_hal::gpio::{Gpio10, PinDriver};
+use esp_idf_hal::gpio::{InputPin, OutputPin};
+use esp_idf_hal::peripheral::Peripheral;
 use esp_idf_hal::peripherals::Peripherals;
-use esp_idf_hal::spi::{Dma, SpiConfig, SpiDeviceDriver, SpiDriver};
-use esp_idf_hal::spi::config::DriverConfig;
+use esp_idf_hal::spi::SpiAnyPins;
+use esp_idf_hal::units::FromValueType;
+use rotary_encoder_embedded::Direction;
+use ssd1306::prelude::DisplayConfig;
 
-pub struct SdMmcClock;
+use crate::display::TinyDisplay;
+use crate::encoder::RotaryEncoder;
+use crate::file_list::FileList;
+use crate::micro_sdcard::MicroSdCard;
 
-impl TimeSource for SdMmcClock {
-    fn get_timestamp(&self) -> Timestamp {
-        Timestamp {
-            year_since_1970: 0,
-            zero_indexed_month: 0,
-            zero_indexed_day: 0,
-            hours: 0,
-            minutes: 0,
-            seconds: 0,
-        }
-    }
-}
+mod display;
+mod file_list;
+mod micro_sdcard;
+mod encoder;
 
 #[derive(Debug)]
 enum CustomError {
@@ -28,6 +30,8 @@ enum CustomError {
     UnableToInitializeCSPin,
     UnableToGetVolume,
     UnableToOpenDirectory,
+    FailedToInitializeI2cDriver,
+    FailedToInitializeDisplay,
 }
 
 impl std::error::Error for CustomError {}
@@ -43,66 +47,46 @@ fn main() -> anyhow::Result<()> {
 
     let peripherals = Peripherals::take().ok_or(CustomError::UnableToTakePeripherals)?;
 
+    // For Micro SD Card
     let cs = peripherals.pins.gpio10;
     let sck = peripherals.pins.gpio3;
     let mosi = peripherals.pins.gpio2;
     let miso = peripherals.pins.gpio1;
 
-    let driver = SpiDriver::new(
-        peripherals.spi2,
-        sck,
-        mosi,
-        Some(miso),
-        &DriverConfig::default().dma(Dma::Disabled),
-    )?;
+    // For Display
+    let scl = peripherals.pins.gpio11;
+    let sda = peripherals.pins.gpio12;
 
-    let config = SpiConfig::default();
-    let device = SpiDeviceDriver::new(driver, Option::<Gpio10>::None, &config)?;
-    let cs_pin = PinDriver::output(cs)?;
-    let sdcard = SdCard::new(device, cs_pin, FreeRtos);
+    // For Rotary Encoder
+    let s1_pin = peripherals.pins.gpio16;
+    let s2_pin = peripherals.pins.gpio21;
+    let key_pin = peripherals.pins.gpio17;
 
-    println!("Card size {:?}", sdcard.num_bytes());
+    let display = TinyDisplay::new(peripherals.i2c0, sda, scl)?;
+    let mut sdcard = MicroSdCard::new(peripherals.spi2, sck, mosi, miso, cs)?;
+    let mut encoder = RotaryEncoder::new(s1_pin, s2_pin, key_pin)?;
 
-    let mut volume_manager = VolumeManager::new(sdcard, SdMmcClock);
-    let mut volume0 = volume_manager.get_volume(VolumeIdx(0)).unwrap();
+    let files = sdcard.list_files()?;
 
-    let root_dir = volume_manager.open_root_dir(&volume0).unwrap();
+    let mut file_list = FileList::new(display, files)?;
+    file_list.draw()?;
 
-    let mut my_entry = None;
+    let file_list = Mutex::new(file_list);
 
-    volume_manager
-        .iterate_dir(&volume0, &root_dir, |entry| {
-            if entry.name.extension() == b"TXT" {
-                my_entry = Some(entry.clone());
-            }
-        })
-        .unwrap();
+    encoder.handle(Box::new(move |direction, is_clicked| {
+        let mut locked = file_list
+            .lock()
+            .map_err(|error| anyhow!("unable to acquire lock: {:?}", error))?;
 
-    if let Some(entry) = my_entry {
-        let mut file = volume_manager
-            .open_dir_entry(&mut volume0, entry, Mode::ReadOnly)
-            .unwrap();
-
-        let content = read_file(&mut volume_manager, volume0, &mut file);
-
-        println!("{:?}", String::from_utf8(content))
-    }
+        match direction {
+            Direction::Clockwise => locked.scroll_up(),
+            Direction::Anticlockwise => locked.scroll_down(),
+            Direction::None => Ok(())
+        }
+    }));
 
     loop {
-        FreeRtos::delay_ms(100);
+        encoder.update()?;
+        FreeRtos::delay_ms(1);
     }
-}
-
-fn read_file(volume_manager: &mut VolumeManager<impl BlockDevice, impl TimeSource>, volume: Volume, file: &mut File) -> Vec<u8> {
-    let mut content = vec![];
-
-    // While the end of the file is not reach, create chunks of 32 bytes and fill it in with the incoming data
-    while !file.eof() {
-        let mut buffer = [0u8; 32];
-        let num_read = volume_manager.read(&volume, file, &mut buffer).unwrap();
-
-        content.extend_from_slice(&buffer[0..num_read]);
-    }
-
-    content
 }
