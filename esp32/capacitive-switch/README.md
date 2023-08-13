@@ -1,4 +1,4 @@
-# Micro SD Card (HW-125)
+# Capacitive Switch (HW-138)
 
 https://github.com/milewski/sensors-esp/assets/2874967/a2bc9a32-4bb4-4a30-bed7-615bd0ee7357
 
@@ -19,4 +19,4 @@ cargo run -p micro-sdcard
 
 ### Notes
 
-- Current libraries only supports FAT16 and FAT32 file systems.
+- There are some functions that can be enabled / disabled on the board by bridging some of the extra pins it provides: https://www.youtube.com/watch?v=8_GjbO8Nru0

@@ -1,0 +1,17 @@
+[package]
+name = "capacitive-switch"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+esp-idf-sys.workspace = true
+esp-idf-hal.workspace = true
+anyhow.workspace = true
+button-driver = { version = "0.1.1", features = ["std", "embedded_hal"] }
+ssd1306 = "0.8.0"
+embedded-graphics = "0.8.1"
+profont = "0.7.0"
+rotary-encoder-embedded = "0.2.0"
+
+[build-dependencies]
+embuild.workspace = true
