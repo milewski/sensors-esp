@@ -1,6 +1,6 @@
 use embedded_sdmmc::DirEntry;
 use numfmt::{Formatter, Precision, Scales};
-use profont::{PROFONT_7_POINT, PROFONT_9_POINT};
+use profont::PROFONT_9_POINT;
 
 use crate::display::TinyDisplay;
 
@@ -63,8 +63,8 @@ impl<'a> FileList<'a> {
         for (index, file) in self.files[self.offset..].iter().take(self.limit).enumerate() {
             let size = format!("{:>4}", self.formatter.fmt2(file.size));
 
-            self.display.draw_text(size.as_str(), PROFONT_7_POINT, 0, offset_top + (10 * index as i32))?;
-            self.display.draw_text(file.name.to_string().as_str(), PROFONT_9_POINT, 25, offset_top + (10 * index as i32))?;
+            self.display.draw_text(size.as_str(), PROFONT_9_POINT, 0, offset_top + (10 * index as i32))?;
+            self.display.draw_text(file.name.to_string().as_str(), PROFONT_9_POINT, 30, offset_top + (10 * index as i32))?;
         }
 
         self.display.flush()

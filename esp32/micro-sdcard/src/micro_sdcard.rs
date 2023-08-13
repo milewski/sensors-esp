@@ -1,7 +1,7 @@
 use anyhow::anyhow;
-use embedded_sdmmc::{Directory, DirEntry, File, SdCard, TimeSource, Timestamp, Volume, VolumeIdx, VolumeManager};
+use embedded_sdmmc::*;
 use esp_idf_hal::delay::FreeRtos;
-use esp_idf_hal::gpio::{Gpio10, InputPin, Output, OutputPin, PinDriver};
+use esp_idf_hal::gpio::{InputPin, Output, OutputPin, PinDriver};
 use esp_idf_hal::peripheral::Peripheral;
 use esp_idf_hal::spi::{Dma, SpiAnyPins, SpiConfig, SpiDeviceDriver, SpiDriver};
 use esp_idf_hal::spi::config::DriverConfig;
@@ -39,7 +39,7 @@ impl<'d, CS: OutputPin> MicroSdCard<'d, CS> {
         let driver = SpiDriver::new(spi2, sck, mosi, Some(miso), &driver_config)?;
 
         let spi_config = SpiConfig::default();
-        let device = SpiDeviceDriver::new(driver, Option::<Gpio10>::None, &spi_config)?;
+        let device = SpiDeviceDriver::new(driver, Option::<CS>::None, &spi_config)?;
         let cs_pin = PinDriver::output(cs)?;
         let sdcard = SdCard::new(device, cs_pin, FreeRtos);
 

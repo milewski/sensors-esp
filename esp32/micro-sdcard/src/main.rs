@@ -1,51 +1,24 @@
-use std::fmt::{Display, Formatter};
 use std::sync::Mutex;
 
 use anyhow::anyhow;
-use embedded_graphics::Drawable;
-use embedded_graphics::prelude::*;
-use embedded_sdmmc::{BlockDevice, TimeSource};
 use esp_idf_hal::delay::FreeRtos;
-use esp_idf_hal::gpio::{InputPin, OutputPin};
-use esp_idf_hal::peripheral::Peripheral;
-use esp_idf_hal::peripherals::Peripherals;
-use esp_idf_hal::spi::SpiAnyPins;
-use esp_idf_hal::units::FromValueType;
+use esp_idf_hal::prelude::*;
 use rotary_encoder_embedded::Direction;
-use ssd1306::prelude::DisplayConfig;
 
 use crate::display::TinyDisplay;
-use crate::encoder::RotaryEncoder;
 use crate::file_list::FileList;
 use crate::micro_sdcard::MicroSdCard;
+use crate::rotary_encoder::RotaryEncoder;
 
 mod display;
 mod file_list;
 mod micro_sdcard;
-mod encoder;
-
-#[derive(Debug)]
-enum CustomError {
-    UnableToTakePeripherals,
-    UnableToInitializeCSPin,
-    UnableToGetVolume,
-    UnableToOpenDirectory,
-    FailedToInitializeI2cDriver,
-    FailedToInitializeDisplay,
-}
-
-impl std::error::Error for CustomError {}
-
-impl Display for CustomError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Error: {:?}", self)
-    }
-}
+mod rotary_encoder;
 
 fn main() -> anyhow::Result<()> {
     esp_idf_sys::link_patches();
 
-    let peripherals = Peripherals::take().ok_or(CustomError::UnableToTakePeripherals)?;
+    let peripherals = Peripherals::take().ok_or(anyhow!("failed to initialize peripherals"))?;
 
     // For Micro SD Card
     let cs = peripherals.pins.gpio10;

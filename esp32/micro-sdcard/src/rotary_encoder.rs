@@ -1,11 +1,11 @@
-use button_driver::{Button, ButtonConfig, State};
+use button_driver::{Button, ButtonConfig};
 use esp_idf_hal::gpio::{Input, InputPin, PinDriver};
 use rotary_encoder_embedded::Direction;
 use rotary_encoder_embedded::standard::StandardMode;
 
 type Callback = Box<dyn Fn(Direction, bool) -> anyhow::Result<()>>;
 
-pub struct RotaryEncoder<'d, CLK: InputPin, DT: InputPin, KEY: InputPin, > where {
+pub struct RotaryEncoder<'d, CLK: InputPin, DT: InputPin, KEY: InputPin> {
     callbacks: Vec<Callback>,
     button: Button<PinDriver<'d, KEY, Input>>,
     encoder: rotary_encoder_embedded::RotaryEncoder<StandardMode, PinDriver<'d, DT, Input>, PinDriver<'d, CLK, Input>>,
@@ -60,10 +60,6 @@ impl<'d, CLK, DT, KEY> RotaryEncoder<'d, CLK, DT, KEY>
 
     pub fn is_clicked(&self) -> bool {
         self.button.is_clicked()
-    }
-
-    pub fn button_state(&self) -> State {
-        self.button.raw_state()
     }
 
     pub fn reset(&mut self) {
