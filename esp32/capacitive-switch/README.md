@@ -1,20 +1,19 @@
-# Capacitive Switch (HW-138)
+# Capacitive Switch (Touch Sensor) (HW-138)
 
-https://github.com/milewski/sensors-esp/assets/2874967/a2bc9a32-4bb4-4a30-bed7-615bd0ee7357
+https://github.com/milewski/sensors-esp/assets/2874967/b1282f06-6cc8-4f18-97e7-f6fb12d65381
 
-Read / Write data to a SD Card module through an SPI Interface.
+This example uses `interrupts` to detect when the capacitive switch is touched.
 
 ## Features
 
-- Show the root directory of the SDCARD into the display.
-- Use a rotary encoder to scroll the list up / down.
+- Guess the random generated number by touching the capacitive switch.
 
 ### How to Run
 
 To run the example, use the following command:
 
 ```bash
-cargo run -p micro-sdcard
+cargo run -p capacitive-switch
 ```
 
 ### Notes

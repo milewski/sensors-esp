@@ -6,6 +6,7 @@ My personal journey into embedded development with Lilygo T-Display S3 Microcont
 - [Line Tracking Sensor](./esp32/line-tracking-sensor)
 - [Passive Buzzer](./esp32/passive-buzzer)
 - [Micro SD Card](./esp32/micro-sdcard)
+- [Capacitive Switch (Touch Sensor)](./esp32/capacitive-switch)
 
 ## Instructions
 
