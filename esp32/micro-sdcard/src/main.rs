@@ -4,13 +4,12 @@ use anyhow::anyhow;
 use esp_idf_hal::delay::FreeRtos;
 use esp_idf_hal::prelude::*;
 use rotary_encoder_embedded::Direction;
+use shared::tiny_display::TinyDisplay;
 
-use crate::display::TinyDisplay;
 use crate::file_list::FileList;
 use crate::micro_sdcard::MicroSdCard;
 use crate::rotary_encoder::RotaryEncoder;
 
-mod display;
 mod file_list;
 mod micro_sdcard;
 mod rotary_encoder;

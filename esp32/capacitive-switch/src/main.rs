@@ -2,10 +2,12 @@ use std::sync::Mutex;
 
 use anyhow::anyhow;
 use esp_idf_hal::delay::FreeRtos;
-use esp_idf_hal::gpio::{InterruptType, PinDriver};
+use esp_idf_hal::gpio::{InputPin, PinDriver};
 use esp_idf_hal::prelude::*;
-use esp_idf_sys::TaskHandle_t;
-use rotary_encoder_embedded::Direction;
+use profont::{PROFONT_12_POINT, PROFONT_24_POINT};
+
+use shared::tiny_display::TinyDisplay;
+
 use crate::capacitive_sensor::CapacitiveSensor;
 
 mod capacitive_sensor;
@@ -16,66 +18,95 @@ fn main() -> anyhow::Result<()> {
     let peripherals = Peripherals::take().ok_or(anyhow!("failed to initialize peripherals"))?;
 
     // For Display
-    let scl = peripherals.pins.gpio11;
-    let sda = peripherals.pins.gpio12;
+    let scl = peripherals.pins.gpio12;
+    let sda = peripherals.pins.gpio11;
+
+    // For Green LED
+    let led = peripherals.pins.gpio18;
 
     // For Capacitive Sensor
-    let mut one = PinDriver::input(peripherals.pins.gpio1)?;
-    let mut two = PinDriver::input(peripherals.pins.gpio2)?;
+    let one = peripherals.pins.gpio1;
+    let two = peripherals.pins.gpio2;
     let three = peripherals.pins.gpio3;
     let four = peripherals.pins.gpio10;
 
-    let main_task_handle: TaskHandle_t = esp_idf_hal::task::current().unwrap();
-    //
-    // let timer_conf = esp_idf_hal::timer::config::Config::new().auto_reload(true);
-    // let mut timer = esp_idf_hal::timer::TimerDriver::new(peripherals.timer00, &timer_conf)?;
-    //
-    // timer.set_alarm(200)?;
-    one.set_interrupt_type(InterruptType::NegEdge)?;
-    one.enable_interrupt()?;
+    let mut led = Mutex::new(PinDriver::output(led)?);
+    let mut sensor = CapacitiveSensor::new(one, two, three, four)?;
+    let mut display = Mutex::new(TinyDisplay::new(peripherals.i2c1, sda, scl)?);
 
-    two.set_interrupt_type(InterruptType::NegEdge)?;
-    two.enable_interrupt()?;
+    let mut secret = Mutex::new(["_".to_string(), "__".to_string(), "_".to_string(), "_".to_string()]);
+    let mut index = Mutex::new(0);
+    let secret_code = [fastrand::u8(1..=4), fastrand::u8(1..=4), fastrand::u8(1..=4), fastrand::u8(1..=4)];
 
-    unsafe {
+    println!("The secret code is: {}", secret_code.iter().fold(String::new(), |a, b| format!("{}{}", a, b)));
 
-        one.subscribe(move || {
-            let event_number = 1;
-            esp_idf_hal::task::notify(main_task_handle, event_number);
-        })?;
+    {
+        let mut display = display.lock().map_err(|_| anyhow!("failed to lock display"))?;
+        display.clear();
+        display.draw_text(&"Enter Code".to_string(), PROFONT_12_POINT, 25, 20)?;
 
-        two.subscribe(move || {
-            let event_number = 2;
-            esp_idf_hal::task::notify(main_task_handle, event_number);
-        })?;
-
-        // timer.subscribe(move || {
-        //     let event_number = 42;
-        //     esp_idf_hal::task::notify(main_task_handle, event_number);
-        // })?;
+        draw_secret(&mut display, &secret.lock().unwrap())?;
     }
 
-    // timer.enable_alarm(true)?;
-    // timer.enable(true)?;
+    sensor.on_touch(Box::new(move |button| {
+        let mut index = index.lock().map_err(|_| anyhow!("failed to lock index"))?;
+        let mut secret = secret.lock().map_err(|_| anyhow!("failed to lock secret"))?;
+        let mut display = display.lock().map_err(|_| anyhow!("failed to lock display"))?;
+        let mut led = led.lock().map_err(|_| anyhow!("failed to lock led"))?;
 
-    // let display = TinyDisplay::new(peripherals.i2c0, sda, scl)?;
+        secret[*index] = button.to_string();
 
-    loop {
+        *index += 1;
 
-        // Notify approach
-        // The benefit with this approach over checking a global static variable is
-        // that the scheduler can hold the task, and resume when signaled
-        // so no spinlock is needed
-        let event_id = esp_idf_hal::task::wait_notification(None);
+        draw_secret(&mut display, &secret)?;
 
-        // Note that the println functions are to slow for 200us
-        // Even if we just send one charachter we can not go below 1ms per msg
-        // so we are missing some events here - but if they are evaluated without
-        // printing them the maintask will be fast enough no problem
-        if let Some(event) = event_id {
-            println!("got event with the number {event} from ISR");
+        if *index == 4 {
+            let flat_secret: [u8; 4] = secret
+                .iter()
+                .map(|value| value.parse().unwrap())
+                .collect::<Vec<u8>>()
+                .try_into()
+                .map_err(|_| anyhow!("failed to convert secret"))?;
+
+            display.clear();
+
+            if flat_secret == secret_code {
+                display.draw_text(&"Congratulations".to_string(), PROFONT_12_POINT, 5, 35)?;
+                led.set_high()?;
+            } else {
+                FreeRtos::delay_ms(200);
+
+                display.draw_text(&"Try Again!".to_string(), PROFONT_12_POINT, 25, 35)?;
+                display.flush()?;
+
+                FreeRtos::delay_ms(500);
+
+                // Reset the game
+                *secret = ["_".to_string(), "__".to_string(), "_".to_string(), "_".to_string()];
+                *index = 0;
+
+                display.clear();
+                display.draw_text(&"Enter Code".to_string(), PROFONT_12_POINT, 25, 20)?;
+
+                draw_secret(&mut display, &secret)?;
+            }
+
+            display.flush()?;
         }
 
+        Ok(())
+    }));
+
+    loop {
+        sensor.update()?;
         FreeRtos::delay_ms(1);
     }
+}
+
+fn draw_secret(display: &mut TinyDisplay, secret: &[String; 4]) -> anyhow::Result<()> {
+    for (index, code) in secret.iter().enumerate() {
+        display.draw_text(&code.to_string(), PROFONT_24_POINT, 25 + (20 * index as i32), 50)?;
+    }
+
+    display.flush()
 }

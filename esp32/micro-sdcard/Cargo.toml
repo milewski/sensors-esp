@@ -14,6 +14,7 @@ embedded-graphics = "0.8.1"
 profont = "0.7.0"
 numfmt = "1.1.1"
 rotary-encoder-embedded = "0.2.0"
+shared = { path = "../../shared" }
 
 [build-dependencies]
 embuild.workspace = true

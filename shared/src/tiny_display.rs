@@ -47,7 +47,7 @@ impl<'d> TinyDisplay<'d> {
         self.device.flush().map_err(|error| anyhow!("failed to flush display: {:?}", error))
     }
 
-    pub fn draw_text(&mut self, text: &str, font: MonoFont, x: i32, y: i32) -> anyhow::Result<Point> {
+    pub fn draw_text(&mut self, text: &String, font: MonoFont, x: i32, y: i32) -> anyhow::Result<Point> {
         let text = Text::new(
             text,
             Point::new(x, y),

@@ -1,7 +1,11 @@
 [package]
-name = "capacitive-switch"
+name = "shared"
 version.workspace = true
+authors.workspace = true
 edition.workspace = true
+rust-version.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 esp-idf-sys.workspace = true
@@ -10,8 +14,4 @@ anyhow.workspace = true
 ssd1306 = "0.8.0"
 embedded-graphics = "0.8.1"
 profont = "0.7.0"
-shared = { path = "../../shared" }
-fastrand = "2.0.0"
-
-[build-dependencies]
-embuild.workspace = true
+numfmt = "1.1.1"
