@@ -25,7 +25,7 @@ impl<'d> TinyDisplay<'d> {
 
         let interface: I2CInterface<I2cDriver> = I2CDisplayInterface::new(driver);
 
-        let mut device = Ssd1306::new(
+        let device = Ssd1306::new(
             interface,
             DisplaySize128x64,
             DisplayRotation::Rotate0,

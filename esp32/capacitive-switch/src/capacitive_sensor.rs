@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::fmt::{Display, Formatter};
 
 use anyhow::anyhow;
@@ -55,7 +57,7 @@ pub struct CapacitiveSensor<'d, ONE: InputPin, TWO: InputPin, THREE: InputPin, F
     callbacks: Vec<Callback>,
 }
 
-impl<'d, ONE, TWO, THREE, FOUR> CapacitiveSensor<'d, ONE, TWO, THREE, FOUR> where ONE: InputPin, TWO: InputPin, THREE: InputPin, FOUR: InputPin {
+impl<'d, ONE: InputPin, TWO: InputPin, THREE: InputPin, FOUR: InputPin> CapacitiveSensor<'d, ONE, TWO, THREE, FOUR> {
     pub fn new(one: ONE, two: TWO, three: THREE, four: FOUR) -> anyhow::Result<CapacitiveSensor<'d, ONE, TWO, THREE, FOUR>> {
         let mut one = PinDriver::input(one)?;
         let mut two = PinDriver::input(two)?;
