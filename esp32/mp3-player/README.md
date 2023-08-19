@@ -16,4 +16,4 @@ cargo run -p mp3-player
 
 - Datasheet: http://www.robotsforfun.com/datasheets/DFPlayer.pdf
 - C++ Reference: https://github.com/enjoyneering/DFPlayer/blob/main/src/DFPlayer.cpp
-- 
+- https://cahamo.delphidabbler.com/resources/dfplayer-mini#commands
