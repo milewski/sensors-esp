@@ -1,5 +1,5 @@
 [package]
-name = "mp3-player"
+name = "accelerometer"
 version.workspace = true
 edition.workspace = true
 
@@ -11,6 +11,7 @@ embedded-graphics = "0.7.1"
 max7219-driver = "0.2.2"
 shared = { path = "../../shared" }
 dfr0299 = "0.1.1"
+bitflags = "2.4.0"
 
 [build-dependencies]
 embuild.workspace = true
