@@ -7,6 +7,7 @@ My personal journey into embedded development with a `ESP32-S3` Microcontroller
 - [Passive Buzzer](./esp32/passive-buzzer)
 - [Micro SD Card](./esp32/micro-sdcard)
 - [Capacitive Switch (Touch Sensor)](./esp32/capacitive-switch)
+- [Accelerometer (ADXL345)](./esp32/accelerometer)
 
 ## Instructions
 

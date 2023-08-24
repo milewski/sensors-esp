@@ -57,15 +57,7 @@ impl<'d> Accelerometer<'d> {
         Ok(Self { driver, address: 0x53 })
     }
 
-    fn read(&mut self, register: RegisterMap) -> anyhow::Result<u8> {
-        let mut response = [0u8; 1];
-
-        self.driver.write_read(self.address, &[register.into()], &mut response, BLOCK)?;
-
-        Ok(response[0])
-    }
-
-    fn read_bytes(&mut self, register: RegisterMap) -> anyhow::Result<[u8; 8]> {
+    fn read(&mut self, register: RegisterMap) -> anyhow::Result<[u8; 8]> {
         let mut response = [0u8; 8];
 
         self.driver.write_read(self.address, &[register.into()], &mut response, BLOCK)?;
@@ -82,7 +74,7 @@ impl<'d> Accelerometer<'d> {
     }
 
     pub fn device_id(&mut self) -> anyhow::Result<u8> {
-        self.read(RegisterMap::DeviceId)
+        Ok(self.read(RegisterMap::DeviceId)?[0])
     }
 
     pub fn start(&mut self) -> anyhow::Result<()> {
@@ -90,7 +82,7 @@ impl<'d> Accelerometer<'d> {
     }
 
     pub fn acceleration(&mut self) -> anyhow::Result<(i16, i16, i16)> {
-        let response = self.read_bytes(RegisterMap::AxisXData0)?;
+        let response = self.read(RegisterMap::AxisXData0)?;
 
         Ok((
             i16::from_le_bytes([response[0], response[1]]),

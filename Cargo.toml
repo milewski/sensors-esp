@@ -9,6 +9,8 @@ esp-idf-sys = { version = "0.33.1", features = ["native", "binstart"] }
 esp-idf-hal = { git = "https://github.com/esp-rs/esp-idf-hal", branch = "master", features = ["critical-section"] }
 anyhow = "1.0.72"
 embuild = "0.31.2"
+embedded-graphics = "0.8.1"
+profont = "0.7.0"
 
 [workspace]
 resolver = "2"
