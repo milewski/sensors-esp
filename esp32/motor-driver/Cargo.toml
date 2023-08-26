@@ -1,0 +1,13 @@
+[package]
+name = "motor-driver"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+esp-idf-sys.workspace = true
+esp-idf-hal.workspace = true
+anyhow.workspace = true
+esp32-nimble = "0.2.0"
+
+[build-dependencies]
+embuild.workspace = true
