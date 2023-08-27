@@ -1,6 +1,4 @@
-### BLE Remote Control APP
-
-This is a companion app for the [motor driver example](..).
+### BLE Companion APP for the [motor driver example](..)
 
 This is a flutter app, and currently I have only tested it on `Android`. although it should just work on `iOS` as well.
 
