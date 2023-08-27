@@ -1,0 +1,17 @@
+name: remote_control
+description: Remote control for the motor driver project
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.1.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_joystick: ^0.0.3
+  flutter_blue_plus: ^1.14.11
+  permission_handler: ^10.4.3
+
+flutter:
+  uses-material-design: true
