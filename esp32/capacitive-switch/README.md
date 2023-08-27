@@ -1,6 +1,6 @@
 # Capacitive Switch (Touch Sensor) (HW-138)
 
-https://github.com/milewski/sensors-esp/assets/2874967/b1282f06-6cc8-4f18-97e7-f6fb12d65381
+https://github.com/milewski/sensors-esp/assets/2874967/0d71b46c-7d89-42c1-a9ca-309e2c878b82
 
 This example uses `interrupts` to detect when the capacitive switch is touched.
 

@@ -1,6 +1,6 @@
 # Micro SD Card (HW-125)
 
-https://github.com/milewski/sensors-esp/assets/2874967/a2bc9a32-4bb4-4a30-bed7-615bd0ee7357
+https://github.com/milewski/sensors-esp/assets/2874967/3a201961-1b17-4acc-9759-398c52dc3896
 
 Read / Write data to a SD Card module through an SPI Interface.
 
