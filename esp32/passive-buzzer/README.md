@@ -1,6 +1,6 @@
 # Passive Buzzer
 
-https://github.com/milewski/sensors-esp/assets/2874967/4fd229d9-babe-495e-8abf-6bdeab3a12ad
+https://github.com/milewski/sensors-esp/assets/2874967/ee46c321-5585-4388-8074-82dd050f5034
 
 This example uses an RMT transmitter to generate pulses at a specific frequency to play a song on a passive buzzer.
 
