@@ -8,6 +8,7 @@ My personal journey into embedded development with a `ESP32-S3` Microcontroller
 - [Micro SD Card](./esp32/micro-sdcard)
 - [Capacitive Switch (Touch Sensor)](./esp32/capacitive-switch)
 - [Accelerometer (ADXL345)](./esp32/accelerometer)
+- [Motor Driver (DVR8833)](./esp32/motor-driver)
 
 ## Instructions
 
