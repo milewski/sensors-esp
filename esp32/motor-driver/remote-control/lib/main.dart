@@ -5,6 +5,8 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_joystick/flutter_joystick.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+enum JoystickPosition { left, right }
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -32,20 +34,14 @@ void main() {
 }
 
 class JoystickApp extends StatefulWidget {
-  const JoystickApp({Key? key, this.adapterState}) : super(key: key);
-
-  final BluetoothAdapterState? adapterState;
+  const JoystickApp({Key? key}) : super(key: key);
 
   @override
   JoystickAppState createState() => JoystickAppState();
 }
 
-enum JoystickPosition { left, right }
-
 class JoystickAppState extends State<JoystickApp> {
-  BluetoothDevice? device;
-  BluetoothService? service;
-  BluetoothCharacteristic? startCharacteristic;
+  BluetoothCharacteristic? controlCharacteristic;
   List<int> previousState = [0, 0, 0, 0];
 
   @override
@@ -96,19 +92,17 @@ class JoystickAppState extends State<JoystickApp> {
                         debugPrint("==================== Services: $service");
                       }
 
+                      var service = subscription.device.servicesList?.firstWhere((BluetoothService service) {
+                        return service.serviceUuid == Guid("00000000-0000-0000-0000-000000000000");
+                      });
+
                       setState(() {
-                        device = subscription.device;
-
-                        service = subscription.device.servicesList?.firstWhere((BluetoothService service) {
-                          return service.serviceUuid == Guid("00000000-0000-0000-0000-000000000000");
-                        });
-
-                        startCharacteristic = service?.characteristics.firstWhere((BluetoothCharacteristic characteristic) {
+                        controlCharacteristic = service?.characteristics.firstWhere((BluetoothCharacteristic characteristic) {
                           return characteristic.uuid == Guid("00000000-0000-0000-0000-000000000001");
                         });
                       });
-                    } catch (e) {
-                      debugPrint("==================== Error: $e");
+                    } catch (error) {
+                      debugPrint("==================== Error: $error");
                     }
                   }),
             ),
@@ -155,7 +149,7 @@ class JoystickAppState extends State<JoystickApp> {
 
       debugPrint("==================== Writing: $payload");
 
-      startCharacteristic?.write(payload, withoutResponse: true);
+      controlCharacteristic?.write(payload, withoutResponse: true);
     }
   }
 }
