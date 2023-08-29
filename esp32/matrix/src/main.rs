@@ -80,20 +80,24 @@ fn main() -> anyhow::Result<()> {
             cs.set_high()?;
         }
 
-        for row in 0..8 {
+        for row in 0..8u8 {
             let mut display_top: u8 = 0;
             let mut display_bottom: u8 = 0;
 
             for column in 0..8 {
-                let index = column * 8 + row;
+                let index = (column * 8 + row) as usize;
 
-                display_top |= (matrix[0 + index] << (7 - column));
-                display_bottom |= (matrix[64 + index] << (7 - column));
+                // The data format is 0b00000000 where each bit represents a pixel (LED)
+                display_top |= matrix[0 + index] << (7 - column);
+                display_bottom |= matrix[64 + index] << (7 - column);
             }
 
             cs.set_low()?;
-            spi.write(&[row as u8 + 1, display_top])?;
-            spi.write(&[row as u8 + 1, display_bottom])?;
+
+            // first write sends the data to the latest matrix on the chain
+            spi.write(&[row + 1, display_top])?;
+            spi.write(&[row + 1, display_bottom])?;
+
             cs.set_high()?;
         }
 
