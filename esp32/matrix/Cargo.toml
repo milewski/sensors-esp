@@ -1,0 +1,12 @@
+[package]
+name = "matrix"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+esp-idf-sys.workspace = true
+esp-idf-hal.workspace = true
+anyhow.workspace = true
+
+[build-dependencies]
+embuild.workspace = true
