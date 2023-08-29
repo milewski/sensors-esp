@@ -26,5 +26,8 @@ espup install
 <details>
   <summary>Pinout Diagram</summary>
 
-  ![esp32-s3r8-pinout](./attachments/esp32-s3r8-pinout.png)
+![esp32-s3-devkitc-1-pinout](./attachments/esp32-s3-devkitc-1-pinout.png)
+
+## LilyGo T-Display S3
+![esp32-s3r8-pinout](./attachments/esp32-s3r8-pinout.png)
 </details>
