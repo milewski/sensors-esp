@@ -96,6 +96,7 @@ impl Into<u8> for Mode {
 pub struct Matrix<'d, CS: OutputPin> {
     spi: SpiDeviceDriver<'d, SpiDriver<'d>>,
     cs: PinDriver<'d, CS, Output>,
+    cache: [u8; 128],
 }
 
 impl<'d, CS: OutputPin> Matrix<'d, CS> {
@@ -113,21 +114,21 @@ impl<'d, CS: OutputPin> Matrix<'d, CS> {
 
         let mut cs = PinDriver::output(cs)?;
 
-        Ok(Self { spi, cs })
+        Ok(Self { spi, cs, cache: [0u8; 128] })
     }
 
     pub fn initialize(&mut self) -> Result<(), EspError> {
         self.write(RegisterAddressMap::Shutdown, Mode::NormalOperation.into())?;
         self.write(RegisterAddressMap::DecodeMode, DecodeMode::NoDecode.into())?;
         self.write(RegisterAddressMap::ScanLimit, ScanLimit::DisplayDigit0To7.into())?;
-        self.write(RegisterAddressMap::Intensity, Intensity::TwentyThreeThirtyTwo.into())?;
+        self.write(RegisterAddressMap::Intensity, Intensity::OneThirtyTwo.into())?;
         self.clear()?;
 
         Ok(())
     }
 
     fn write(&mut self, register: RegisterAddressMap, value: u8) -> Result<(), EspError> {
-        self.cs.set_high()?;
+        self.cs.set_low()?;
         self.spi.write(&[register.into(), value])?;
         self.cs.set_high()
     }
@@ -136,20 +137,29 @@ impl<'d, CS: OutputPin> Matrix<'d, CS> {
         for index in 1..=8 {
             self.cs.set_low()?;
             self.spi.write(&[index, 0])?;
+            self.spi.write(&[index, 0])?;
             self.cs.set_high()?;
+        }
+
+        for mut value in self.cache {
+            value = 0;
         }
 
         Ok(())
     }
 
     pub fn write_data(&mut self, matrix: &[u8; 128]) -> Result<(), EspError> {
-        self.clear()?;
+        if matrix.eq(&self.cache) {
+            return Ok(());
+        }
+
+        // self.clear()?;
 
         for row in 0..8u8 {
             let mut display_top: u8 = 0;
             let mut display_bottom: u8 = 0;
 
-            for column in 0..8 {
+            for column in 0..8u8 {
                 let index = (column * 8 + row) as usize;
 
                 // The data format is 0b00000000 where each bit represents a pixel (LED)
@@ -164,6 +174,11 @@ impl<'d, CS: OutputPin> Matrix<'d, CS> {
             self.spi.write(&[row + 1, display_bottom])?;
 
             self.cs.set_high()?;
+        }
+
+        // rebuild cache
+        for (index, value) in matrix.iter().enumerate() {
+            self.cache[index] = *value;
         }
 
         Ok(())
