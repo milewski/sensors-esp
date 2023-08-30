@@ -7,6 +7,8 @@ edition.workspace = true
 esp-idf-sys.workspace = true
 esp-idf-hal.workspace = true
 anyhow.workspace = true
+fastrand = "2.0.0"
+tetrice = "0.1.0"
 
 [build-dependencies]
 embuild.workspace = true
