@@ -157,7 +157,7 @@ fn main() -> anyhow::Result<()> {
     let mut display: Matrix<'_, _, 128, 2> = Matrix::new(peripherals.spi2, sck, mosi, cs)?;
     display.initialize()?;
 
-    let mut block = Tetrimino::new_i();
+    let mut block = Tetrimino::new_random();
 
     loop {
         display.fill();
