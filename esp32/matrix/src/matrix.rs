@@ -2,8 +2,10 @@ use esp_idf_hal::gpio::{AnyIOPin, InputPin, Output, OutputPin, PinDriver};
 use esp_idf_hal::peripheral::Peripheral;
 use esp_idf_hal::spi::{SpiAnyPins, SpiConfig, SpiDeviceDriver, SpiDriver};
 use esp_idf_hal::spi::config::DriverConfig;
+use esp_idf_hal::units::FromValueType;
 use esp_idf_sys::EspError;
 
+#[derive(Copy, Clone)]
 enum RegisterAddressMap {
     Noop = 0x0,
     Digit0 = 0x1,
@@ -93,13 +95,14 @@ impl Into<u8> for Mode {
     }
 }
 
-pub struct Matrix<'d, CS: OutputPin> {
+pub struct Matrix<'d, CS: OutputPin, const BUFFER_SIZE: usize, const DISPLAY_COUNT: usize> {
     spi: SpiDeviceDriver<'d, SpiDriver<'d>>,
     cs: PinDriver<'d, CS, Output>,
-    cache: [u8; 128],
+    cache: [u8; BUFFER_SIZE],
+    is_dirty: bool,
 }
 
-impl<'d, CS: OutputPin> Matrix<'d, CS> {
+impl<'d, CS: OutputPin, const BUFFER_SIZE: usize, const DISPLAY_COUNT: usize> Matrix<'d, CS, BUFFER_SIZE, DISPLAY_COUNT> {
     pub fn new(
         spi: impl Peripheral<P=impl SpiAnyPins> + 'd,
         sck: impl Peripheral<P=impl InputPin + OutputPin> + 'd,
@@ -109,12 +112,14 @@ impl<'d, CS: OutputPin> Matrix<'d, CS> {
         let driver_config = DriverConfig::default();
 
         let driver = SpiDriver::new(spi, sck, mosi, Option::<AnyIOPin>::None, &driver_config)?;
-        let spi_config = SpiConfig::default();
-        let mut spi = SpiDeviceDriver::new(driver, Option::<AnyIOPin>::None, &spi_config)?;
+        let config = SpiConfig::default().baudrate(5.MHz().into());
+        let mut spi = SpiDeviceDriver::new(driver, Option::<AnyIOPin>::None, &config)?;
 
         let mut cs = PinDriver::output(cs)?;
 
-        Ok(Self { spi, cs, cache: [0u8; 128] })
+        assert_eq!(BUFFER_SIZE, 8 * 8 * DISPLAY_COUNT, "buffer size must be 8 * 8 * display count");
+
+        Ok(Self { spi, cs, cache: [0u8; BUFFER_SIZE], is_dirty: false })
     }
 
     pub fn initialize(&mut self) -> Result<(), EspError> {
@@ -122,21 +127,30 @@ impl<'d, CS: OutputPin> Matrix<'d, CS> {
         self.write(RegisterAddressMap::DecodeMode, DecodeMode::NoDecode.into())?;
         self.write(RegisterAddressMap::ScanLimit, ScanLimit::DisplayDigit0To7.into())?;
         self.write(RegisterAddressMap::Intensity, Intensity::OneThirtyTwo.into())?;
+
         self.clear()?;
 
         Ok(())
     }
 
-    fn write(&mut self, register: RegisterAddressMap, value: u8) -> Result<(), EspError> {
-        self.cs.set_low()?;
-        self.spi.write(&[register.into(), value])?;
-        self.cs.set_high()
+    pub fn flush(&mut self) -> Result<(), EspError> {
+        self.write_data()
+    }
+
+    pub fn set(&mut self, index: usize, value: u8) {
+        if let Some(data) = self.cache.get_mut(index) {
+            *data = value;
+        }
+    }
+
+    pub fn fill(&mut self) {
+        self.cache.fill(0);
+        self.is_dirty = true;
     }
 
     pub fn clear(&mut self) -> Result<(), EspError> {
         for index in 1..=8 {
             self.cs.set_low()?;
-            self.spi.write(&[index, 0])?;
             self.spi.write(&[index, 0])?;
             self.cs.set_high()?;
         }
@@ -148,39 +162,43 @@ impl<'d, CS: OutputPin> Matrix<'d, CS> {
         Ok(())
     }
 
-    pub fn write_data(&mut self, matrix: &[u8; 128]) -> Result<(), EspError> {
-        if matrix.eq(&self.cache) {
+    fn write_data(&mut self) -> Result<(), EspError> {
+        if self.is_dirty == false {
             return Ok(());
         }
 
-        // self.clear()?;
-
         for row in 0..8u8 {
-            let mut display_top: u8 = 0;
-            let mut display_bottom: u8 = 0;
+            let mut buffer = [0u8; DISPLAY_COUNT];
 
             for column in 0..8u8 {
                 let index = (column * 8 + row) as usize;
 
-                // The data format is 0b00000000 where each bit represents a pixel (LED)
-                display_top |= matrix[0 + index] << (7 - column);
-                display_bottom |= matrix[64 + index] << (7 - column);
+                for display in 0..DISPLAY_COUNT {
+                    buffer[display] |= self.cache[(display * 8 * 8) + index] << (7 - column);
+                }
             }
 
             self.cs.set_low()?;
 
-            // first write sends the data to the latest matrix on the chain
-            self.spi.write(&[row + 1, display_top])?;
-            self.spi.write(&[row + 1, display_bottom])?;
+            for display in 0..DISPLAY_COUNT {
+                self.spi.write(&[row + 1, buffer[display]])?;
+            }
 
             self.cs.set_high()?;
         }
 
-        // rebuild cache
-        for (index, value) in matrix.iter().enumerate() {
-            self.cache[index] = *value;
-        }
+        self.is_dirty = false;
 
         Ok(())
+    }
+
+    fn write(&mut self, register: RegisterAddressMap, value: u8) -> Result<(), EspError> {
+        self.cs.set_low()?;
+
+        for _ in 0..DISPLAY_COUNT {
+            self.spi.write(&[register.into(), value])?;
+        }
+
+        self.cs.set_high()
     }
 }

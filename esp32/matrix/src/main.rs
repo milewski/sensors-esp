@@ -1,14 +1,147 @@
 use anyhow::anyhow;
 use esp_idf_hal::delay::FreeRtos;
 use esp_idf_hal::prelude::Peripherals;
-use tetrice::{BlockKind, Cell, Game};
+
 use crate::matrix::Matrix;
 
 mod matrix;
 
+struct Tetrimino {
+    width: usize,
+    height: usize,
+    shape: Vec<u8>,
+    position: Position,
+}
 
-fn selector() -> BlockKind {
-    BlockKind::all_as_array()[fastrand::usize(0..7)]
+impl Tetrimino {
+    fn new_l() -> Self {
+        Self {
+            width: 2,
+            height: 3,
+            position: Position { x: 0, y: 0 },
+            shape: vec![
+                1, 0,
+                1, 0,
+                1, 1,
+            ],
+        }
+    }
+
+    fn new_j() -> Self {
+        Self {
+            width: 2,
+            height: 3,
+            position: Position { x: 0, y: 0 },
+            shape: vec![
+                0, 1,
+                0, 1,
+                1, 1,
+            ],
+        }
+    }
+
+    fn new_t() -> Self {
+        Self {
+            width: 3,
+            height: 2,
+            position: Position { x: 0, y: 0 },
+            shape: vec![
+                0, 1, 0,
+                1, 1, 1,
+            ],
+        }
+    }
+
+    fn new_o() -> Self {
+        Self {
+            width: 2,
+            height: 2,
+            position: Position { x: 0, y: 0 },
+            shape: vec![
+                1, 1,
+                1, 1,
+            ],
+        }
+    }
+
+    fn new_s() -> Self {
+        Self {
+            width: 3,
+            height: 2,
+            position: Position { x: 0, y: 0 },
+            shape: vec![
+                0, 1, 1,
+                1, 1, 0,
+            ],
+        }
+    }
+
+    fn new_z() -> Self {
+        Self {
+            width: 3,
+            height: 2,
+            position: Position { x: 0, y: 0 },
+            shape: vec![
+                1, 1, 0,
+                0, 1, 1,
+            ],
+        }
+    }
+
+    fn new_i() -> Self {
+        Self {
+            width: 1,
+            height: 4,
+            position: Position { x: 0, y: 0 },
+            shape: vec![
+                1,
+                1,
+                1,
+                1,
+            ],
+        }
+    }
+
+    fn new_random() -> Self {
+        let mut block = match fastrand::u8(0..7) {
+            0 => Self::new_l(),
+            1 => Self::new_j(),
+            2 => Self::new_t(),
+            3 => Self::new_o(),
+            4 => Self::new_s(),
+            5 => Self::new_z(),
+            6 => Self::new_i(),
+            _ => unreachable!(),
+        };
+
+        for _ in 0..fastrand::usize(0..4) {
+            block.rotate()
+        }
+
+        block.position.x = fastrand::usize(block.width - 1..8);
+        block
+    }
+
+    fn rotate(&mut self) {
+        let mut new_shape = vec![0; self.width * self.height];
+        for height in 0..self.height {
+            for width in 0..self.width {
+                new_shape[width * self.height + self.height - height - 1] = self.shape[height * self.width + width];
+            }
+        }
+
+        let old_width = self.width;
+        let old_height = self.height;
+
+        self.shape = new_shape;
+        self.width = old_height;
+        self.height = old_width;
+    }
+}
+
+struct Position {
+    x: usize,
+    y: usize,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -21,36 +154,31 @@ fn main() -> anyhow::Result<()> {
     let cs = peripherals.pins.gpio5;
     let mosi = peripherals.pins.gpio4;
 
-    let mut matrix_display = Matrix::new(peripherals.spi2, sck, mosi, cs)?;
-    matrix_display.initialize()?;
+    let mut display: Matrix<'_, _, 128, 2> = Matrix::new(peripherals.spi2, sck, mosi, cs)?;
+    display.initialize()?;
 
-    let mut game = Game::new(8, 16, 3, Box::new(selector));
-
-    let mut matrix = [0u8; 128];
+    let mut block = Tetrimino::new_i();
 
     loop {
-        FreeRtos::delay_ms(100);
+        display.fill();
 
-        // for (index, row) in game.field().as_vec().iter().enumerate() {
-        //     for (cell_index, cell) in row.iter().enumerate() {
-        //         let cell = match cell {
-        //             Cell::Empty => 0,
-        //             Cell::Block(_) => 1,
-        //             _ => 1
-        //         };
-        //
-        //         matrix[index * 8 + cell_index] = cell;
-        //     }
-        // }
+        for width in 0..block.width {
+            for height in 0..block.height {
+                display.set(
+                    (block.position.y + height) * 8 + (block.position.x.saturating_sub(width)),
+                    block.shape[height * block.width + width],
+                );
+            }
+        }
 
-        matrix_display.write_data(&matrix)?;
+        block.position.y += 1;
 
-        game.soft_drop();
-        // game.save();
-        // game.move_left();
+        if block.position.y > 16 {
+            block = Tetrimino::new_random();
+        }
 
-        println!("{:?}", game.tetrimino());
+        display.flush()?;
 
-        FreeRtos::delay_ms(500);
+        FreeRtos::delay_ms(25);
     }
 }
