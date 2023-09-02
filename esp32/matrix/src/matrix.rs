@@ -150,15 +150,8 @@ impl<'d, CS: OutputPin, const BUFFER_SIZE: usize, const DISPLAY_COUNT: usize> Ma
     }
 
     pub fn clear(&mut self) -> Result<(), EspError> {
-        for index in 1..=8 {
-            self.cs.set_low()?;
-            self.spi.write(&[index, 0])?;
-            self.cs.set_high()?;
-        }
-
-        for mut value in self.cache {
-            value = 0;
-        }
+        self.fill();
+        self.flush()?;
 
         Ok(())
     }

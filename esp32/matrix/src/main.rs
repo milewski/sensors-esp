@@ -114,7 +114,7 @@ impl Tetrimino {
             _ => unreachable!(),
         };
 
-        for _ in 0..fastrand::usize(0..4) {
+        for _ in 0..fastrand::u8(0..4) {
             block.rotate()
         }
 
