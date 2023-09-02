@@ -1,8 +1,8 @@
-use esp_idf_hal::gpio::{AnyIOPin, InputPin, Output, OutputPin, PinDriver};
+use esp_idf_hal::gpio::{AnyIOPin, AnyOutputPin, InputPin, Output, OutputPin, PinDriver};
 use esp_idf_hal::peripheral::Peripheral;
+use esp_idf_hal::prelude::*;
 use esp_idf_hal::spi::{SpiAnyPins, SpiConfig, SpiDeviceDriver, SpiDriver};
 use esp_idf_hal::spi::config::DriverConfig;
-use esp_idf_hal::units::FromValueType;
 use esp_idf_sys::EspError;
 
 #[derive(Copy, Clone)]
@@ -29,7 +29,8 @@ impl Into<u8> for RegisterAddressMap {
     }
 }
 
-enum Intensity {
+#[derive(Copy, Clone)]
+pub enum Intensity {
     OneThirtyTwo = 0x00,
     ThreeThirtyTwo = 0x01,
     FiveThirtyTwo = 0x02,
@@ -111,9 +112,9 @@ impl<'d, CS: OutputPin, const BUFFER_SIZE: usize, const DISPLAY_COUNT: usize> Ma
     ) -> anyhow::Result<Self> {
         let driver_config = DriverConfig::default();
 
-        let driver = SpiDriver::new(spi, sck, mosi, Option::<AnyIOPin>::None, &driver_config)?;
+        let driver = SpiDriver::new(spi, sck, mosi, None::<AnyIOPin>, &driver_config)?;
         let config = SpiConfig::default().baudrate(5.MHz().into());
-        let mut spi = SpiDeviceDriver::new(driver, Option::<AnyIOPin>::None, &config)?;
+        let mut spi = SpiDeviceDriver::new(driver, None::<AnyOutputPin>, &config)?;
 
         let mut cs = PinDriver::output(cs)?;
 

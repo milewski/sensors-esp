@@ -3,16 +3,14 @@ use std::sync::Mutex;
 use anyhow::anyhow;
 use esp_idf_hal::delay::FreeRtos;
 use esp_idf_hal::prelude::*;
-use rotary_encoder_embedded::Direction;
 use shared::tiny_display::TinyDisplay;
 
 use crate::file_list::FileList;
 use crate::micro_sdcard::MicroSdCard;
-use crate::rotary_encoder::RotaryEncoder;
+use shared::rotary_encoder::{Direction, RotaryEncoder};
 
 mod file_list;
 mod micro_sdcard;
-mod rotary_encoder;
 
 fn main() -> anyhow::Result<()> {
     esp_idf_sys::link_patches();
@@ -36,7 +34,7 @@ fn main() -> anyhow::Result<()> {
 
     let display = TinyDisplay::new(peripherals.i2c0, sda, scl)?;
     let mut sdcard = MicroSdCard::new(peripherals.spi2, sck, mosi, miso, cs)?;
-    let mut encoder = RotaryEncoder::new(s1_pin, s2_pin, key_pin)?;
+    let mut encoder = RotaryEncoder::new(s1_pin, s2_pin, Some(key_pin))?;
 
     let files = sdcard.list_files()?;
 
