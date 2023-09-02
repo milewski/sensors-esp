@@ -124,6 +124,7 @@ impl Tetrimino {
 
     fn rotate(&mut self) {
         let mut new_shape = vec![0; self.width * self.height];
+
         for height in 0..self.height {
             for width in 0..self.width {
                 new_shape[width * self.height + self.height - height - 1] = self.shape[height * self.width + width];
@@ -179,6 +180,6 @@ fn main() -> anyhow::Result<()> {
 
         display.flush()?;
 
-        FreeRtos::delay_ms(25);
+        FreeRtos::delay_ms(50);
     }
 }

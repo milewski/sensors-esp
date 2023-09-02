@@ -127,7 +127,7 @@ impl<'d, CS: OutputPin, const BUFFER_SIZE: usize, const DISPLAY_COUNT: usize> Ma
         self.write(RegisterAddressMap::Shutdown, Mode::NormalOperation.into())?;
         self.write(RegisterAddressMap::DecodeMode, DecodeMode::NoDecode.into())?;
         self.write(RegisterAddressMap::ScanLimit, ScanLimit::DisplayDigit0To7.into())?;
-        self.write(RegisterAddressMap::Intensity, Intensity::OneThirtyTwo.into())?;
+        self.write(RegisterAddressMap::Intensity, Intensity::ThirtyOneThirtyTwo.into())?;
 
         self.clear()?;
 
