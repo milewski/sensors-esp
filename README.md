@@ -1,4 +1,4 @@
-# Learning Embedded Development on ESP32 (S3R8)
+# Learning Embedded Development on ESP32
 
 My personal journey into embedded development with a `ESP32-S3` Microcontroller
 

@@ -35,12 +35,12 @@ fn main() -> anyhow::Result<()> {
     // send(&mut driver, &address, Mode::FunctionSet as u8 | Font::FrontFiveByEight as u8, Mode::Cmd);
 
     let display_ctrl = DisplayControl::DisplayOn as u8 | DisplayControl::CursorOn as u8;
-    let display_ctrl = display_ctrl | DisplayControl::CursorBlink as u8;
+    // let display_ctrl = display_ctrl | DisplayControl::CursorBlink as u8;
 
     send(&mut driver, &address, Mode::DisplayControl as u8 | display_ctrl, Mode::Cmd);
     send(&mut driver, &address, Mode::Cmd as u8 | Commands::Clear as u8, Mode::Cmd); // Clear Display
 
-    for char in "Hello World!! I hope you dont mind if I".chars().map(|char| char as u8) {
+    for char in "Hello World!!".chars().map(|char| char as u8) {
         // send(&mut driver, &address, c as u8, Mode::Data);
 
         println!("{:08b} - {} ({:08b} - {:08b})", char, char, char & 0b1111_0000, (char << 4) & 0b1111_0000);
