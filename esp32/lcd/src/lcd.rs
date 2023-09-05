@@ -1,7 +1,4 @@
-use std::ops::BitOr;
-use esp_idf_hal::delay;
-
-use esp_idf_hal::delay::{BLOCK, FreeRtos};
+use esp_idf_hal::delay::{BLOCK};
 use esp_idf_hal::gpio::{InputPin, OutputPin};
 use esp_idf_hal::i2c::{I2c, I2cDriver};
 use esp_idf_hal::i2c::config::Config;
@@ -33,14 +30,6 @@ enum Mode {
     FunctionSet = 0b0010_0000,
 }
 
-impl BitOr<BitMode> for Mode {
-    type Output = u8;
-
-    fn bitor(self, rhs: BitMode) -> Self::Output {
-        self as u8 | rhs as u8
-    }
-}
-
 enum Command {
     Clear = 0b0000_0001,
     ReturnHome = 0b0000_0010,
@@ -67,33 +56,9 @@ enum Rows {
     TwoLines = 0b0000_1000,
 }
 
-impl BitOr<Rows> for Mode {
-    type Output = u8;
-
-    fn bitor(self, rhs: Rows) -> Self::Output {
-        self as u8 | rhs as u8
-    }
-}
-
 enum Font {
     FiveByEleven = 0b0000_0100,
     FiveByEight = 0b0000_0000,
-}
-
-impl BitOr<Font> for Mode {
-    type Output = u8;
-
-    fn bitor(self, rhs: Font) -> Self::Output {
-        self as u8 | rhs as u8
-    }
-}
-
-impl BitOr<Font> for u8 {
-    type Output = u8;
-
-    fn bitor(self, rhs: Font) -> Self::Output {
-        self as u8 | rhs as u8
-    }
 }
 
 pub struct LCD<'d, DELAY> {
@@ -156,7 +121,7 @@ impl<'d, DELAY> LCD<'d, DELAY> where DELAY: Fn(u32) -> () {
         self.write_4_bits(mode_4bit)?;
 
         // Function set command
-        self.write_command(Mode::FunctionSet | Rows::TwoLines | Font::FiveByEleven, Mode::Command)?;
+        self.write_command(Mode::FunctionSet as u8 | Rows::TwoLines as u8 | Font::FiveByEleven as u8, Mode::Command)?;
 
         let initialization_code = 0
             | DisplayControl::DisplayOn as u8
