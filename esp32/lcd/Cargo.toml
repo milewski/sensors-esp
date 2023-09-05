@@ -9,7 +9,6 @@ esp-idf-hal.workspace = true
 anyhow.workspace = true
 fastrand = "2.0.0"
 shared = { path = "../../shared" }
-lcd-lcm1602-i2c = "0.1.0"
 
 [build-dependencies]
 embuild.workspace = true

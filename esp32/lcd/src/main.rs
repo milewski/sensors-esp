@@ -1,6 +1,7 @@
 use anyhow::anyhow;
 use esp_idf_hal::delay::FreeRtos;
 use esp_idf_hal::prelude::{FromValueType, Peripherals};
+use crate::lcd::Direction;
 
 mod lcd;
 
@@ -9,33 +10,38 @@ fn main() -> anyhow::Result<()> {
 
     let peripherals = Peripherals::take().ok_or(anyhow!("failed to initialize peripherals"))?;
 
-    // For Display
+    // For LCD
     let sda = peripherals.pins.gpio2;
     let scl = peripherals.pins.gpio1;
 
-    // let mut driver = I2cDriver::new(peripherals.i2c1, sda, scl, &Config::new().baudrate(100.kHz().into()))?;
-
-    let mut display = lcd::LCD::new(peripherals.i2c1, sda, scl)?;
+    let mut display = lcd::LCD::new(peripherals.i2c1, sda, scl, FreeRtos::delay_ms)?;
 
     display.initialize()?;
-    display.write_str("First Line")?;
+    display.write_str("Hello")?;
     display.cursor_move_to(1, 0)?;
-    display.write_str("Second Line!")?;
+    display.write_str("World")?;
 
-    // loop {
-    //     FreeRtos::delay_ms(200);
-    //     display.scroll(lcd::Direction::Right)?;
-    //     FreeRtos::delay_ms(200);
-    // }
-    // display.cursor(true)?;
-    // display.cursor_blink(false)?;
-    // display.cursor_move_to(0, 15)?;
-    // display.clear()?;
-
-    // set_cursor(&mut driver, &address, 1, 3);
+    let mut scroll_direction = lcd::Direction::Right;
+    let mut counter = 0;
 
     loop {
-        FreeRtos::delay_ms(500);
+        match scroll_direction {
+            Direction::Right => {
+                counter += 1;
+            }
+            Direction::Left => {
+                counter -= 1;
+            }
+        };
+
+        FreeRtos::delay_ms(400);
+        display.scroll(scroll_direction)?;
+
+        scroll_direction = match counter {
+            value if value >= 11 => Direction::Left,
+            value if value <= 0 => Direction::Right,
+            _ => scroll_direction
+        };
     }
 }
 

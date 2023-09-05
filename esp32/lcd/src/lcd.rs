@@ -1,4 +1,5 @@
 use std::ops::BitOr;
+use esp_idf_hal::delay;
 
 use esp_idf_hal::delay::{BLOCK, FreeRtos};
 use esp_idf_hal::gpio::{InputPin, OutputPin};
@@ -95,22 +96,25 @@ impl BitOr<Font> for u8 {
     }
 }
 
-pub struct LCD<'d> {
+pub struct LCD<'d, DELAY> {
     address: u8,
+    delay: DELAY,
     backlight: Backlight,
     show_cursor: bool,
     blink_cursor: bool,
     driver: I2cDriver<'d>,
 }
 
-impl<'d> LCD<'d> {
+impl<'d, DELAY> LCD<'d, DELAY> where DELAY: Fn(u32) -> () {
     pub fn new(
         i2c: impl Peripheral<P=impl I2c> + 'd,
         sda: impl Peripheral<P=impl InputPin + OutputPin> + 'd,
         scl: impl Peripheral<P=impl InputPin + OutputPin> + 'd,
+        delay: DELAY,
     ) -> Result<Self, EspError> {
         Ok(
             Self {
+                delay,
                 show_cursor: false,
                 blink_cursor: false,
                 address: 0b0100_111,
@@ -195,10 +199,10 @@ impl<'d> LCD<'d> {
 
     fn write_4_bits(&mut self, data: u8) -> Result<(), EspError> {
         self.driver.write(self.address, &[data | DisplayControl::DisplayOn as u8 | self.backlight as u8], BLOCK)?;
-        FreeRtos::delay_ms(1);
+        (self.delay)(1);
 
         self.driver.write(self.address, &[DisplayControl::Off as u8 | self.backlight as u8], BLOCK)?;
-        FreeRtos::delay_ms(5);
+        (self.delay)(5);
 
         Ok(())
     }
