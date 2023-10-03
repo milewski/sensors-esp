@@ -11,6 +11,7 @@ My personal journey into embedded development with a `ESP32-S3` Microcontroller
 - [Motor Driver (DVR8833)](./esp32/motor-driver)
 - [8x8 Matrix (MAX7219)](./esp32/matrix)
 - [Liquid Crystal Display (LCD 1602A)](./esp32/lcd)
+- [DTMF Decoding (MT8870)](./esp32/dtmf)
 
 ## Instructions
 

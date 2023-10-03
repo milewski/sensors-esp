@@ -1,0 +1,16 @@
+[package]
+name = "dtmf"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+esp-idf-sys.workspace = true
+esp-idf-hal.workspace = true
+anyhow.workspace = true
+shared = { path = "../../shared" }
+ssd1306 = "0.8.0"
+embedded-graphics = "0.8.1"
+profont = "0.7.0"
+
+[build-dependencies]
+embuild.workspace = true
