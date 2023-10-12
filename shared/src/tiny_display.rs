@@ -11,7 +11,7 @@ use ssd1306::mode::BufferedGraphicsMode;
 use ssd1306::prelude::*;
 
 pub struct TinyDisplay<'d> {
-    device: Ssd1306<I2CInterface<I2cDriver<'d>>, DisplaySize128x64, BufferedGraphicsMode<DisplaySize128x64>>,
+    pub device: Ssd1306<I2CInterface<I2cDriver<'d>>, DisplaySize128x64, BufferedGraphicsMode<DisplaySize128x64>>,
 }
 
 impl<'d> TinyDisplay<'d> {

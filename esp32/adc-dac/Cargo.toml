@@ -1,0 +1,15 @@
+[package]
+name = "adc-dac"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+esp-idf-sys.workspace = true
+esp-idf-hal.workspace = true
+embedded-graphics.workspace = true
+anyhow.workspace = true
+shared = { path = "../../shared" }
+profont = "0.7.0"
+
+[build-dependencies]
+embuild.workspace = true
