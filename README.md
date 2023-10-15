@@ -12,6 +12,7 @@ My personal journey into embedded development with a `ESP32-S3` Microcontroller
 - [8x8 Matrix (MAX7219)](./esp32/matrix)
 - [Liquid Crystal Display (LCD 1602A)](./esp32/lcd)
 - [DTMF Decoding (MT8870)](./esp32/dtmf)
+- [ADC/DAC Analog Digital Converter (PCF8591)](./esp32/adc-dac)
 
 ## Instructions
 

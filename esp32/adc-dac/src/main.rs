@@ -24,7 +24,7 @@ fn main() -> anyhow::Result<()> {
 
     let peripherals = Peripherals::take().ok_or(anyhow!("failed to initialize peripherals"))?;
 
-    // For
+    // For ADC/DAC Module
     let sda = peripherals.pins.gpio4;
     let scl = peripherals.pins.gpio5;
 
