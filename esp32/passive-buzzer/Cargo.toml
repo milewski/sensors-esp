@@ -4,14 +4,13 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-esp-idf-sys.workspace = true
-esp-idf-hal.workspace = true
-anyhow.workspace = true
+esp-idf-sys = { version = "0.33.1", features = ["native", "binstart"] }
+esp-idf-hal = "0.41.2"
+anyhow = "1.0.72"
 rotary-encoder-embedded = "0.2.0"
 embedded-controls = "0.1.5"
 button-driver = { version = "0.1.1", features = ["std", "esp"] }
 tm1637 = "0.1.0"
-rotary-encoder = { path = "../rotary-encoder" }
 
 [build-dependencies]
 embuild.workspace = true

@@ -85,7 +85,7 @@ fn main() -> anyhow::Result<()> {
         rgb_led_1.set_color(Color::green()).expect("failed to set color");
     });
 
-    server.on_disconnect(move |connection| {
+    server.on_disconnect(move |connection, _| {
         println!("disconnected!: {:?}", connection);
         let mut rgb_led_2 = led_2.lock().expect("failed to acquire lock");
         rgb_led_2.set_color(Color::red()).expect("failed to set color");

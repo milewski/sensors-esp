@@ -4,9 +4,9 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-esp-idf-sys.workspace = true
-esp-idf-hal.workspace = true
-anyhow.workspace = true
+esp-idf-sys = { version = "0.33.1", features = ["native", "binstart"] }
+esp-idf-hal = "0.41.2"
+anyhow = "1.0.72"
 fastrand = "2.0.0"
 shared = { path = "../../shared" }
 
